@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Reward System</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #121212;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            text-align: center;
+            background: #1f1f1f;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            width: 300px;
+        }
+        .container h1 {
+            font-size: 20px;
+            color: green;
+            margin-bottom: 10px;
+        }
+        .stats p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .buttons button {
+            width: 90%;
+            margin: 5px 0;
+            padding: 10px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            background: green;
+            cursor: pointer;
+        }
+        .buttons button:hover {
+            background: darkorange;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Auto MoneTag Ads</h1>
+        <p>Welcome, <span id="user-name">@exampleUser</span></p>
+        <div class="stats">
+            <p>Watched Ads: <span id="watched-ads">0</span></p>
+            <p>Earned Points: <span id="earned-points">0</span></p>
+        </div>
+        <div class="buttons">
+            <button id="watch-ad-btn" onclick="watchAd()">Watch Ad</button>
+            <button id="auto-ad-btn" onclick="startAutoAds()">Auto Show Ads</button>
+            <button id="stop-auto-btn" onclick="stopAutoAds()">Stop Auto Ads</button>
+        </div>
+    </div>
+
+    <script src='//whephiwums.com/sdk.js' data-zone='9106497' data-sdk='show_9106497'></script>
+
+    <script>
+        // প্রতিটি বট আলাদা ডাটা সংরক্ষণের জন্য আলাদা KEY
+        const BOT_NAME = "More"; // প্রতিটি বটের জন্য আলাদা নাম দিন
+        const watchedAdsKey = `${More}_watchedAdsCount`;
+        const earnedPointsKey = `${More}_earnedPoints`;
+
+        let watchedAdsCount = 0;
+        let earnedPoints = 0.00;
+        let autoAdInterval;
+        let adClickCount = 0; // প্রথম কয়েকটি ক্লিকে ভুল বিজ্ঞাপন ব্লক করার জন্য
+
+        // পূর্ববর্তী ডাটা লোড করা
+        if (localStorage.getItem(watchedAdsKey)) {
+            watchedAdsCount = parseInt(localStorage.getItem(watchedAdsKey));
+            earnedPoints = parseFloat(localStorage.getItem(earnedPointsKey));
+            document.getElementById('watched-ads').textContent = watchedAdsCount;
+            document.getElementById('earned-points').textContent = earnedPoints.toFixed(2);
+        }
+
+        function watchAd() {
+            adClickCount++;
+
+            // প্রথম ৩ বার ক্লিকে বিজ্ঞাপন লোড হবে না
+            if (adClickCount <= 3) {
+                console.log("Skipping first few ads...");
+                return;
+            }
+
+            if (typeof show_9106497 === 'function') {
+                show_9106497().then(() => {
+                    watchedAdsCount++;
+                    earnedPoints += 0.50; // প্রতিটি বিজ্ঞাপনে 0.50 পয়েন্ট
+                    document.getElementById('watched-ads').textContent = watchedAdsCount;
+                    document.getElementById('earned-points').textContent = earnedPoints.toFixed(2);
+                    localStorage.setItem(watchedAdsKey, watchedAdsCount);
+                    localStorage.setItem(earnedPointsKey, earnedPoints.toFixed(2));
+                });
+            }
+        }
+
+        function startAutoAds() {
+            autoAdInterval = setInterval(watchAd, 2000); // প্রতি ২ সেকেন্ড পর বিজ্ঞাপন দেখাবে
+            document.getElementById('auto-ad-btn').disabled = true;
+            document.getElementById('stop-auto-btn').disabled = false;
+        }
+
+        function stopAutoAds() {
+            clearInterval(autoAdInterval);
+            document.getElementById('auto-ad-btn').disabled = false;
+            document.getElementById('stop-auto-btn').disabled = true;
+        }
+    </script>
+</body>
+</html>
